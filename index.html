@@ -163,58 +163,6 @@
         width: 100%;
         height: 120px;
       }
-      #fire-container {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100vh;
-        pointer-events: none;
-        overflow: hidden;
-        z-index: 3000;
-      }
-      .fire {
-        position: absolute;
-        top: -700px;
-        width: 160px;
-        height: 700px;
-        margin-left: -80px;
-        background: url('https://www.dublincleaners.com/wp-content/uploads/2025/06/Firesprite.png') no-repeat;
-        background-size: 1920px 700px;
-        animation:
-          flicker 1.2s steps(12) infinite,
-          descend 4s linear forwards,
-          fadeout 4s ease-out forwards,
-          sway var(--sway-duration, 3s) ease-in-out infinite alternate;
-        animation-play-state: paused;
-        opacity: 1;
-      }
-
-      @keyframes sway {
-        0% {
-          transform: translateX(0);
-        }
-        25% {
-          transform: translateX(calc(-1 * var(--amplitude, 20px)));
-        }
-        50% {
-          transform: translateX(var(--amplitude, 20px));
-        }
-        75% {
-          transform: translateX(calc(-1 * var(--amplitude, 20px)));
-        }
-        100% {
-          transform: translateX(0);
-        }
-      }
-
-      @keyframes flicker { from { background-position: 0 0; } to { background-position: -1920px 0; } }
-      @keyframes descend {
-        to {
-          transform: translateY(100vh);
-        }
-      }
-      @keyframes fadeout { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
     </style>
     <script>
       function updateDateTime() {
@@ -282,8 +230,6 @@
         setTimeout(function() {
           clearInterval(interval);
           overlay.style.display = 'none';
-          createFires(20);
-          startFireAnimations();
         }, 5000);
       }
 
@@ -476,28 +422,6 @@
         }, 2000);
       }
 
-      function createFires(count) {
-        var container = document.getElementById('fire-container');
-        if (!container) return;
-        container.innerHTML = '';
-        for (var i = 0; i < count; i++) {
-          var fire = document.createElement('div');
-          fire.className = 'fire';
-          var left = Math.random() * window.innerWidth;
-          fire.style.left = left + 'px';
-          fire.style.animationDelay = (Math.random() * 5).toFixed(2) + 's';
-          fire.style.setProperty('--amplitude', (10 + Math.random() * 20) + 'px');
-          fire.style.setProperty('--sway-duration', (2 + Math.random() * 3) + 's');
-          container.appendChild(fire);
-        }
-      }
-
-      function startFireAnimations() {
-        var fires = document.querySelectorAll('.fire');
-        fires.forEach(function(fire) {
-          fire.style.animationPlayState = 'running';
-        });
-      }
 
       document.addEventListener('DOMContentLoaded', function() {
         startLoadingAnimation();
@@ -529,6 +453,5 @@
       <img id="driver-img" src="https://www.dublincleaners.com/wp-content/uploads/2025/06/Driver7.png" alt="Driver">
     </div>
     <div id="weekly-quote" class="weekly-quote"></div>
-    <div id="fire-container"></div>
   </body>
 </html>
