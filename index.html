@@ -11,6 +11,11 @@
       .header-title .datetime { font-size: 18px; margin-top: 8px; color: #ffd1d1; }
       .weather { text-align: right; color: #ffd1d1; }
       .weather div { line-height: 1.2; }
+      .add-frame-btn { margin-top: 8px; padding: 6px 12px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; }
+      .add-frame-btn:hover { background-color: #ffd1d1; }
+      .viewing-area { position: relative; height: calc(100vh - 200px); overflow: hidden; background-color: rgba(255,255,255,0.8); }
+      .frame { position: absolute; border: 2px solid #333; background: #fff; box-sizing: border-box; }
+      .frame .resizer { width: 10px; height: 10px; background: #333; position: absolute; right: 0; bottom: 0; cursor: se-resize; }
     </style>
     <script>
       function updateDateTime() {
@@ -32,6 +37,112 @@
         updateDateTime();
         setInterval(updateDateTime, 60000);
         google.script.run.withSuccessHandler(updateWeather).getWeather();
+        google.script.run.withSuccessHandler(loadFrames).getFrames();
+        document.getElementById('add-frame').addEventListener('click', addFrame);
+      }
+
+      var frames = [];
+      var zIndex = 1;
+
+      function loadFrames(data) {
+        frames = data || [];
+        frames.forEach(function(f, i) { createFrame(f, i); });
+      }
+
+      function saveFrames() {
+        google.script.run.saveFrames(frames);
+      }
+
+      function addFrame() {
+        var frame = { x: 10, y: 10, width: 200, height: 150 };
+        frames.push(frame);
+        createFrame(frame, frames.length - 1);
+        saveFrames();
+      }
+
+      function createFrame(frame, index) {
+        var area = document.getElementById('viewing-area');
+        var div = document.createElement('div');
+        div.className = 'frame';
+        div.style.left = frame.x + 'px';
+        div.style.top = frame.y + 'px';
+        div.style.width = frame.width + 'px';
+        div.style.height = frame.height + 'px';
+        div.dataset.index = index;
+        div.style.zIndex = zIndex++;
+
+        var resizer = document.createElement('div');
+        resizer.className = 'resizer';
+        div.appendChild(resizer);
+
+        area.appendChild(div);
+
+        enableDrag(div);
+        enableResize(div, resizer);
+      }
+
+      function enableDrag(el) {
+        var offsetX, offsetY, idx;
+
+        el.addEventListener('mousedown', function(e) {
+          if (e.target.classList.contains('resizer')) return;
+          idx = parseInt(el.dataset.index, 10);
+          offsetX = e.clientX - el.offsetLeft;
+          offsetY = e.clientY - el.offsetTop;
+          el.style.zIndex = zIndex++;
+          function move(ev) {
+            var area = document.getElementById('viewing-area');
+            var rect = area.getBoundingClientRect();
+            var x = ev.clientX - offsetX - rect.left;
+            var y = ev.clientY - offsetY - rect.top;
+            x = Math.max(0, Math.min(x, rect.width - el.offsetWidth));
+            y = Math.max(0, Math.min(y, rect.height - el.offsetHeight));
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            frames[idx].x = x;
+            frames[idx].y = y;
+          }
+          function up() {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            saveFrames();
+          }
+          document.addEventListener('mousemove', move);
+          document.addEventListener('mouseup', up);
+        });
+      }
+
+      function enableResize(el, handle) {
+        var startX, startY, startW, startH, idx;
+
+        handle.addEventListener('mousedown', function(e) {
+          e.stopPropagation();
+          idx = parseInt(el.dataset.index, 10);
+          startX = e.clientX;
+          startY = e.clientY;
+          startW = el.offsetWidth;
+          startH = el.offsetHeight;
+          el.style.zIndex = zIndex++;
+          function move(ev) {
+            var area = document.getElementById('viewing-area');
+            var rect = area.getBoundingClientRect();
+            var width = startW + ev.clientX - startX;
+            var height = startH + ev.clientY - startY;
+            width = Math.max(50, Math.min(width, rect.width - el.offsetLeft));
+            height = Math.max(50, Math.min(height, rect.height - el.offsetTop));
+            el.style.width = width + 'px';
+            el.style.height = height + 'px';
+            frames[idx].width = width;
+            frames[idx].height = height;
+          }
+          function up() {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', up);
+            saveFrames();
+          }
+          document.addEventListener('mousemove', move);
+          document.addEventListener('mouseup', up);
+        });
       }
     </script>
   </head>
@@ -47,7 +158,9 @@
       <div id="weather" class="weather">
         <div id="weather-temp"></div>
         <div id="weather-condition"></div>
+        <button id="add-frame" class="add-frame-btn">Add Frame</button>
       </div>
     </div>
+    <div id="viewing-area" class="viewing-area"></div>
   </body>
 </html>

@@ -52,3 +52,13 @@ function getWeather() {
   }
   return null;
 }
+
+function getFrames() {
+  var props = PropertiesService.getScriptProperties();
+  var data = props.getProperty('frames');
+  return data ? JSON.parse(data) : [];
+}
+
+function saveFrames(frames) {
+  PropertiesService.getScriptProperties().setProperty('frames', JSON.stringify(frames));
+}
