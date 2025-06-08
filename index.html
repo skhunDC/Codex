@@ -109,24 +109,10 @@
       var frames = [];
       var zIndex = 1;
 
-      function getWeeklyQuote() {
-        var quotes = [
-          "Believe you can and you're halfway there. — Theodore Roosevelt",
-          "The only way to do great work is to love what you do. — Steve Jobs",
-          "Hardships often prepare ordinary people for an extraordinary destiny. — C.S. Lewis",
-          "Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill",
-          "You miss 100% of the shots you don't take. — Wayne Gretzky"
-        ];
-        var startDate = new Date('2025-06-08');
-        var now = new Date();
-        var diff = now - startDate;
-        var week = Math.floor(diff / (7 * 24 * 60 * 60 * 1000));
-        var index = ((week % quotes.length) + quotes.length) % quotes.length;
-        return quotes[index];
-      }
-
       function updateQuote() {
-        document.getElementById('weekly-quote').textContent = getWeeklyQuote();
+        google.script.run.withSuccessHandler(function(text) {
+          document.getElementById('weekly-quote').textContent = text;
+        }).getRandomQuote();
       }
 
       function loadFrames(data) {
