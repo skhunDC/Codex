@@ -27,10 +27,46 @@
         position: relative;
         flex: 1;
         overflow: hidden;
-        background-color: rgba(255,255,255,0.8);
+        background-color: transparent;
       }
-      .frame { position: absolute; border: 2px solid #333; background: #fff; box-sizing: border-box; }
-      .frame .resizer { width: 10px; height: 10px; background: #333; position: absolute; right: 0; bottom: 0; cursor: se-resize; }
+      .frame {
+        position: absolute;
+        border: 2px solid #333;
+        background: #fff;
+        box-sizing: border-box;
+      }
+      .frame-header {
+        background: #333;
+        color: #fff;
+        padding: 2px 24px 2px 4px;
+        cursor: move;
+        position: relative;
+        text-align: center;
+        user-select: none;
+      }
+      .frame-title {
+        width: 100%;
+        outline: none;
+      }
+      .close-btn {
+        position: absolute;
+        right: 2px;
+        top: 2px;
+        background: none;
+        border: none;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .frame .resizer {
+        width: 10px;
+        height: 10px;
+        background: #333;
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        cursor: se-resize;
+      }
       .weekly-quote {
         position: fixed;
         bottom: 10px;
@@ -103,7 +139,7 @@
       }
 
       function addFrame() {
-        var frame = { x: 10, y: 10, width: 200, height: 150 };
+        var frame = { x: 10, y: 10, width: 200, height: 150, title: 'Frame' };
         frames.push(frame);
         createFrame(frame, frames.length - 1);
         saveFrames();
@@ -120,9 +156,36 @@
         div.dataset.index = index;
         div.style.zIndex = zIndex++;
 
+        var header = document.createElement('div');
+        header.className = 'frame-header';
+        var title = document.createElement('div');
+        title.className = 'frame-title';
+        title.contentEditable = true;
+        title.textContent = frame.title || 'Frame';
+        header.appendChild(title);
+        var close = document.createElement('button');
+        close.className = 'close-btn';
+        close.textContent = '\u00D7';
+        header.appendChild(close);
+        div.appendChild(header);
+
         var resizer = document.createElement('div');
         resizer.className = 'resizer';
         div.appendChild(resizer);
+
+        title.addEventListener('input', function() {
+          frames[parseInt(div.dataset.index, 10)].title = title.textContent;
+          saveFrames();
+        });
+
+        close.addEventListener('click', function(e) {
+          e.stopPropagation();
+          var idx = parseInt(div.dataset.index, 10);
+          frames.splice(idx, 1);
+          area.removeChild(div);
+          updateFrameIndices();
+          saveFrames();
+        });
 
         area.appendChild(div);
 
@@ -130,20 +193,28 @@
         enableResize(div, resizer);
       }
 
+      function updateFrameIndices() {
+        var children = document.querySelectorAll('.viewing-area .frame');
+        children.forEach(function(c, i) { c.dataset.index = i; });
+      }
+
       function enableDrag(el) {
-        var offsetX, offsetY, idx;
+        var startX, startY, startLeft, startTop, idx;
 
         el.addEventListener('mousedown', function(e) {
           if (e.target.classList.contains('resizer')) return;
+          e.preventDefault();
           idx = parseInt(el.dataset.index, 10);
-          offsetX = e.clientX - el.offsetLeft;
-          offsetY = e.clientY - el.offsetTop;
+          startX = e.clientX;
+          startY = e.clientY;
+          startLeft = el.offsetLeft;
+          startTop = el.offsetTop;
           el.style.zIndex = zIndex++;
           function move(ev) {
             var area = document.getElementById('viewing-area');
             var rect = area.getBoundingClientRect();
-            var x = ev.clientX - offsetX - rect.left;
-            var y = ev.clientY - offsetY - rect.top;
+            var x = startLeft + ev.clientX - startX;
+            var y = startTop + ev.clientY - startY;
             x = Math.max(0, Math.min(x, rect.width - el.offsetWidth));
             y = Math.max(0, Math.min(y, rect.height - el.offsetHeight));
             el.style.left = x + 'px';
