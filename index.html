@@ -31,7 +31,7 @@
       }
       .frame {
         position: absolute;
-        border: 3px solid #b30000;
+        border: 5px solid #b30000;
         background: #fff;
         box-sizing: border-box;
       }
@@ -189,7 +189,8 @@
         var startX, startY, startLeft, startTop, idx;
 
         el.addEventListener('mousedown', function(e) {
-          if (e.target.classList.contains('resizer')) return;
+          if (e.target.classList.contains('resizer') ||
+              e.target.classList.contains('frame-title')) return;
           e.preventDefault();
           idx = parseInt(el.dataset.index, 10);
           startX = e.clientX;
