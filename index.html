@@ -14,7 +14,16 @@
         flex-direction: column;
         min-height: 100vh;
       }
-      .header { display: flex; align-items: center; justify-content: space-between; background-color: #b30000; color: white; padding: 20px; }
+      .header {
+        position: relative;
+        z-index: 1500;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #b30000;
+        color: white;
+        padding: 20px;
+      }
       .header img { height: 120px; }
       .header-title { text-align: center; flex-grow: 1; }
       .header-title h1 { margin: 0; font-size: 36px; color: #ffffff; }
@@ -182,7 +191,8 @@
       }
 
       var frames = [];
-      var zIndex = 1;
+      // Start frames above the driver overlay (z-index: 1000)
+      var zIndex = 1100;
 
       function startLoadingAnimation() {
         var overlay = document.getElementById('loading-overlay');
