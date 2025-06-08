@@ -40,7 +40,7 @@ function weatherCodeToText(code) {
 
 function getWeather() {
   // Example using Open-Meteo. Replace latitude and longitude with your own.
-  var url = 'https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true';
+  var url = 'https://api.open-meteo.com/v1/forecast?latitude=40.7128&longitude=-74.0060&current_weather=true&temperature_unit=fahrenheit';
   var response = UrlFetchApp.fetch(url);
   var data = JSON.parse(response.getContentText());
   if (data && data.current_weather) {
