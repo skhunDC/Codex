@@ -247,6 +247,30 @@
         width: 100%;
         height: 120px;
       }
+
+      .emoji-rain {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 2500;
+      }
+      .emoji {
+        position: absolute;
+        top: -2em;
+        animation-name: emoji-fall;
+        animation-timing-function: linear;
+        will-change: transform;
+      }
+      @keyframes emoji-fall {
+        to {
+          transform: translateY(100vh);
+          opacity: 0;
+        }
+      }
     </style>
     <script>
       function updateDateTime() {
@@ -788,10 +812,38 @@
         }, 2000);
       }
 
+      function startEmojiRain(duration) {
+        var container = document.createElement('div');
+        container.className = 'emoji-rain';
+        document.body.appendChild(container);
+        var emojis = ['\uD83D\uDC31', '\uD83D\uDC36'];
+        var start = Date.now();
+        var interval = setInterval(function() {
+          if (Date.now() - start > duration) {
+            clearInterval(interval);
+            setTimeout(function() {
+              document.body.removeChild(container);
+            }, 5000);
+            return;
+          }
+          var el = document.createElement('div');
+          el.className = 'emoji';
+          el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          el.style.left = Math.random() * 100 + '%';
+          var size = Math.random() * 24 + 24;
+          el.style.fontSize = size + 'px';
+          var fall = Math.random() * 2 + 3;
+          el.style.animationDuration = fall + 's';
+          container.appendChild(el);
+          setTimeout(function() { container.removeChild(el); }, fall * 1000);
+        }, 200);
+      }
+
 
       document.addEventListener('DOMContentLoaded', function() {
         startLoadingAnimation();
         startDriverAnimation();
+        startEmojiRain(30000);
         setInterval(fadeAndAnimate, 30000);
       });
     </script>
