@@ -89,6 +89,13 @@ function getRandomQuote() {
   return quote || 'Quote unavailable';
 }
 
+var FALLBACK_QUOTES = [
+  'The only way to do great work is to love what you do. — Steve Jobs',
+  'Success is not final, failure is not fatal: it is the courage to continue that counts. — Winston Churchill',
+  'Life is what happens when you\'re busy making other plans. — John Lennon',
+  'You miss 100% of the shots you don\'t take. — Wayne Gretzky'
+];
+
 function fetchQuote() {
   var url = 'https://api.quotable.io/random';
   try {
@@ -100,5 +107,6 @@ function fetchQuote() {
   } catch (e) {
     // ignore errors and fall through
   }
-  return null;
+  // Use a random local quote as a fallback
+  return FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
 }
