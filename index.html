@@ -35,6 +35,7 @@
         background: #fff;
         box-sizing: border-box;
         cursor: crosshair;
+        font-size: 133%;
       }
       .frame-header {
         background: #333;
@@ -59,7 +60,7 @@
         border: none;
         color: #fff;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 21px;
       }
       .frame .resizer {
         width: 10px;
@@ -100,7 +101,7 @@
 
       function init() {
         updateDateTime();
-        setInterval(updateDateTime, 60000);
+        setInterval(updateDateTime, 1000);
         updateQuote();
         // refresh quote once a day
         setInterval(updateQuote, 86400000);
