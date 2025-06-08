@@ -38,10 +38,21 @@
         align-items: center;
       }
       .weather div { line-height: 1.2; }
-      .add-frame-btn { margin-top: 8px; padding: 6px 12px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; }
-      .add-frame-btn:hover { background-color: #ffd1d1; }
-      .lock-btn { margin-top: 4px; padding: 4px 8px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; font-size: 12px; }
-      .lock-btn:hover { background-color: #ffd1d1; }
+      .add-frame-btn,
+      .lock-btn {
+        margin-top: 8px;
+        padding: 6px 12px;
+        background-color: #ffffff;
+        color: #b30000;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        width: 110px;
+      }
+      .add-frame-btn:hover,
+      .lock-btn:hover {
+        background-color: #ffd1d1;
+      }
       .upload-container { position: relative; display: inline-block; }
       .upload-panel {
         display: none;
@@ -341,9 +352,9 @@
         if (!btn) return;
         btn.addEventListener('click', function() {
           framesLocked = !framesLocked;
-          btn.textContent = framesLocked ? 'Unlock Frames' : 'Lock Frames';
+          btn.textContent = framesLocked ? 'Unlock' : 'Lock';
         });
-        btn.textContent = 'Unlock Frames';
+        btn.textContent = 'Unlock';
       }
 
       function init() {
