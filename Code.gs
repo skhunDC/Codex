@@ -64,6 +64,32 @@ function saveFrames(frames) {
 }
 
 function getRandomQuote() {
+  var props = PropertiesService.getScriptProperties();
+  var quote = props.getProperty('weeklyQuote');
+  var timestamp = props.getProperty('weeklyQuoteDate');
+  var now = new Date();
+  var needNew = true;
+
+  if (quote && timestamp) {
+    var last = new Date(timestamp);
+    if (now.getTime() - last.getTime() < 7 * 24 * 60 * 60 * 1000) {
+      needNew = false;
+    }
+  }
+
+  if (needNew) {
+    var newQuote = fetchQuote();
+    if (newQuote) {
+      props.setProperty('weeklyQuote', newQuote);
+      props.setProperty('weeklyQuoteDate', now.toISOString());
+      quote = newQuote;
+    }
+  }
+
+  return quote || 'Quote unavailable';
+}
+
+function fetchQuote() {
   var url = 'https://api.quotable.io/random';
   try {
     var response = UrlFetchApp.fetch(url);
@@ -72,7 +98,7 @@ function getRandomQuote() {
       return data.content + ' — ' + data.author;
     }
   } catch (e) {
-    // ignore errors and fall through to default text
+    // ignore errors and fall through
   }
-  return 'Quote unavailable';
+  return null;
 }
