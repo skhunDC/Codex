@@ -34,12 +34,13 @@
         border: 5px solid #b30000;
         background: #fff;
         box-sizing: border-box;
+        cursor: crosshair;
       }
       .frame-header {
         background: #333;
         color: #fff;
         padding: 2px 24px 2px 4px;
-        cursor: move;
+        cursor: crosshair;
         position: relative;
         text-align: center;
         user-select: none;
@@ -48,6 +49,7 @@
         width: 100%;
         outline: none;
         text-align: center;
+        cursor: text;
       }
       .close-btn {
         position: absolute;
@@ -249,9 +251,33 @@
             saveFrames();
           }
           document.addEventListener('mousemove', move);
-          document.addEventListener('mouseup', up);
-        });
+        document.addEventListener('mouseup', up);
+      });
       }
+
+      function keepFramesInView() {
+        var area = document.getElementById('viewing-area');
+        var rect = area.getBoundingClientRect();
+        var children = document.querySelectorAll('.viewing-area .frame');
+        children.forEach(function(el) {
+          var idx = parseInt(el.dataset.index, 10);
+          var x = Math.max(0, Math.min(el.offsetLeft, rect.width - el.offsetWidth));
+          var y = Math.max(0, Math.min(el.offsetTop, rect.height - el.offsetHeight));
+          var width = Math.max(50, Math.min(el.offsetWidth, rect.width - x));
+          var height = Math.max(50, Math.min(el.offsetHeight, rect.height - y));
+          el.style.left = x + 'px';
+          el.style.top = y + 'px';
+          el.style.width = width + 'px';
+          el.style.height = height + 'px';
+          frames[idx].x = x;
+          frames[idx].y = y;
+          frames[idx].width = width;
+          frames[idx].height = height;
+        });
+        saveFrames();
+      }
+
+      window.addEventListener('resize', keepFramesInView);
     </script>
   </head>
   <body onload="init()">
