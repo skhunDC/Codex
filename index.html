@@ -40,6 +40,8 @@
       .weather div { line-height: 1.2; }
       .add-frame-btn { margin-top: 8px; padding: 6px 12px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; }
       .add-frame-btn:hover { background-color: #ffd1d1; }
+      .lock-btn { margin-top: 4px; padding: 4px 8px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; font-size: 12px; }
+      .lock-btn:hover { background-color: #ffd1d1; }
       .upload-container { position: relative; display: inline-block; }
       .upload-panel {
         display: none;
@@ -334,6 +336,16 @@
         }).getDriverImage();
       }
 
+      function initLockToggle() {
+        var btn = document.getElementById('lock-toggle');
+        if (!btn) return;
+        btn.addEventListener('click', function() {
+          framesLocked = !framesLocked;
+          btn.textContent = framesLocked ? 'Unlock Frames' : 'Lock Frames';
+        });
+        btn.textContent = 'Unlock Frames';
+      }
+
       function init() {
         updateDateTime();
         setInterval(updateDateTime, 1000);
@@ -346,10 +358,12 @@
         initDriver();
         initHeaderTitle();
         initUploads();
+        initLockToggle();
       }
 
       var frames = [];
       var framesLoaded = false;
+      var framesLocked = true;
       // Start frames above the driver overlay (z-index: 1000)
       var zIndex = 1100;
 
@@ -678,6 +692,7 @@
         var startX, startY, startLeft, startTop, idx;
 
         el.addEventListener('mousedown', function(e) {
+          if (framesLocked) return;
           if (
             e.target.classList.contains('resizer') ||
             e.target.classList.contains('frame-title') ||
@@ -718,6 +733,7 @@
         var startX, startY, startW, startH, idx;
 
         handle.addEventListener('mousedown', function(e) {
+          if (framesLocked) return;
           e.stopPropagation();
           idx = parseInt(el.dataset.index, 10);
           startX = e.clientX;
@@ -826,6 +842,7 @@ document.addEventListener('DOMContentLoaded', function() {
           <input type="file" id="logo-upload" accept="image/*" style="display:none;">
           <input type="file" id="driver-upload" accept="image/*" style="display:none;">
         </div>
+        <button id="lock-toggle" class="lock-btn"></button>
       </div>
     </div>
     <div id="viewing-area" class="viewing-area"></div>
