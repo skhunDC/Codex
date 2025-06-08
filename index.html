@@ -349,6 +349,7 @@
       }
 
       var frames = [];
+      var framesLoaded = false;
       // Start frames above the driver overlay (z-index: 1000)
       var zIndex = 1100;
 
@@ -399,6 +400,8 @@
       function loadFrames(data) {
         frames = data || [];
         frames.forEach(function(f, i) { createFrame(f, i); });
+        framesLoaded = true;
+        keepFramesInView();
       }
 
       function initDriver() {
@@ -419,6 +422,7 @@
       }
 
       function saveFrames() {
+        if (!framesLoaded) return;
         google.script.run.saveFrames(frames);
       }
 
@@ -744,6 +748,7 @@
       }
 
       function keepFramesInView() {
+        if (!framesLoaded) return;
         var area = document.getElementById('viewing-area');
         var rect = area.getBoundingClientRect();
         var children = document.querySelectorAll('.viewing-area .frame');
