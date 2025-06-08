@@ -141,12 +141,19 @@
         border-radius: 4px;
         z-index: 1000;
         pointer-events: auto;
+        width: 300px;
       }
 
       .driver-week input {
         width: 100%;
         margin-top: 4px;
         box-sizing: border-box;
+        font-size: 32px;
+        padding: 6px;
+      }
+
+      .driver-week label {
+        font-size: 32px;
       }
       .driver-overlay img {
         width: 100%;
@@ -237,6 +244,7 @@
         google.script.run.withSuccessHandler(updateWeather).getWeather();
         google.script.run.withSuccessHandler(loadFrames).getFrames();
         document.getElementById('add-frame').addEventListener('click', addFrame);
+        initDriver();
       }
 
       var frames = [];
@@ -290,6 +298,16 @@
       function loadFrames(data) {
         frames = data || [];
         frames.forEach(function(f, i) { createFrame(f, i); });
+      }
+
+      function initDriver() {
+        google.script.run.withSuccessHandler(function(name) {
+          document.getElementById('driver-name').value = name || '';
+        }).getDriverOfTheWeek();
+        var input = document.getElementById('driver-name');
+        input.addEventListener('input', function() {
+          google.script.run.saveDriverOfTheWeek(input.value);
+        });
       }
 
       function saveFrames() {

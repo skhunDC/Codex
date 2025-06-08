@@ -63,6 +63,15 @@ function saveFrames(frames) {
   PropertiesService.getScriptProperties().setProperty('frames', JSON.stringify(frames));
 }
 
+function getDriverOfTheWeek() {
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('driverOfWeek') || '';
+}
+
+function saveDriverOfTheWeek(name) {
+  PropertiesService.getScriptProperties().setProperty('driverOfWeek', name || '');
+}
+
 function getRandomQuote() {
   var props = PropertiesService.getScriptProperties();
   var quote = props.getProperty('weeklyQuote');
