@@ -82,6 +82,50 @@
         font-size: 14px;
         border-radius: 4px;
       }
+      .driver-overlay {
+        position: fixed;
+        bottom: 80px;
+        right: 10px;
+        width: 350px;
+        pointer-events: none;
+        z-index: 1000;
+      }
+      .driver-overlay img {
+        width: 100%;
+        height: auto;
+        display: block;
+        mask-image: repeating-linear-gradient(
+          to right,
+          black 0,
+          black 10px,
+          transparent 10px,
+          transparent 20px
+        );
+        -webkit-mask-image: repeating-linear-gradient(
+          to right,
+          black 0,
+          black 10px,
+          transparent 10px,
+          transparent 20px
+        );
+        mask-size: 200% 100%;
+        -webkit-mask-size: 200% 100%;
+        mask-position: 0 0;
+        -webkit-mask-position: 0 0;
+      }
+      .driver-overlay img.animate {
+        animation: maskSlide 2s linear forwards;
+      }
+      @keyframes maskSlide {
+        from {
+          mask-position: 0 0;
+          -webkit-mask-position: 0 0;
+        }
+        to {
+          mask-position: -100% 0;
+          -webkit-mask-position: -100% 0;
+        }
+      }
     </style>
     <script>
       function updateDateTime() {
@@ -279,6 +323,19 @@
       }
 
       window.addEventListener('resize', keepFramesInView);
+
+      function startDriverAnimation() {
+        var img = document.getElementById('driver-img');
+        if (!img) return;
+        img.classList.remove('animate');
+        void img.offsetWidth;
+        img.classList.add('animate');
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        startDriverAnimation();
+        setInterval(startDriverAnimation, 30000);
+      });
     </script>
   </head>
   <body onload="init()">
@@ -297,6 +354,9 @@
       </div>
     </div>
     <div id="viewing-area" class="viewing-area"></div>
+    <div class="driver-overlay">
+      <img id="driver-img" src="https://www.dublincleaners.com/wp-content/uploads/2025/06/Driver7.png" alt="Driver">
+    </div>
     <div id="weekly-quote" class="weekly-quote"></div>
   </body>
 </html>
