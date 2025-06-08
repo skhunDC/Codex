@@ -148,14 +148,39 @@ function saveLogoImage(data) {
 
 function getDriverImage() {
   var props = PropertiesService.getScriptProperties();
-  return props.getProperty('driverImage') || '';
+  var fileId = props.getProperty('driverImageId');
+  if (!fileId) return '';
+  try {
+    var file = DriveApp.getFileById(fileId);
+    var blob = file.getBlob();
+    var base64 = Utilities.base64Encode(blob.getBytes());
+    return 'data:' + blob.getContentType() + ';base64,' + base64;
+  } catch (e) {
+    props.deleteProperty('driverImageId');
+    return '';
+  }
 }
 
 function saveDriverImage(data) {
   var props = PropertiesService.getScriptProperties();
-  if (data) {
-    props.setProperty('driverImage', data);
-  } else {
-    props.deleteProperty('driverImage');
+  var oldId = props.getProperty('driverImageId');
+  if (oldId) {
+    try {
+      DriveApp.getFileById(oldId).setTrashed(true);
+    } catch (e) {
+      // ignore if file missing
+    }
   }
+  if (data) {
+    var m = data.match(/^data:(.+);base64,(.+)$/);
+    if (m) {
+      var contentType = m[1];
+      var bytes = Utilities.base64Decode(m[2]);
+      var blob = Utilities.newBlob(bytes, contentType, 'driver-image');
+      var file = DriveApp.createFile(blob);
+      props.setProperty('driverImageId', file.getId());
+      return;
+    }
+  }
+  props.deleteProperty('driverImageId');
 }
