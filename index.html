@@ -94,6 +94,8 @@
         width: 100%;
         height: auto;
         display: block;
+      }
+      .driver-overlay img.animate {
         mask-image: repeating-linear-gradient(
           to right,
           black 0,
@@ -110,20 +112,18 @@
         );
         mask-size: 200% 100%;
         -webkit-mask-size: 200% 100%;
-        mask-position: 0 0;
-        -webkit-mask-position: 0 0;
+        mask-position: -100% 0;
+        -webkit-mask-position: -100% 0;
+        animation: maskSlideReverse 2s linear forwards;
       }
-      .driver-overlay img.animate {
-        animation: maskSlide 2s linear forwards;
-      }
-      @keyframes maskSlide {
+      @keyframes maskSlideReverse {
         from {
-          mask-position: 0 0;
-          -webkit-mask-position: 0 0;
-        }
-        to {
           mask-position: -100% 0;
           -webkit-mask-position: -100% 0;
+        }
+        to {
+          mask-position: 0 0;
+          -webkit-mask-position: 0 0;
         }
       }
     </style>
@@ -330,6 +330,10 @@
         img.classList.remove('animate');
         void img.offsetWidth;
         img.classList.add('animate');
+        img.addEventListener('animationend', function handler() {
+          img.classList.remove('animate');
+          img.removeEventListener('animationend', handler);
+        });
       }
 
       document.addEventListener('DOMContentLoaded', function() {
