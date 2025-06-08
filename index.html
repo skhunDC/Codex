@@ -13,6 +13,7 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+        overflow: hidden;
       }
       .header {
         position: relative;
@@ -163,21 +164,30 @@
         height: 120px;
       }
       .fire {
-        position: absolute;
-        width: 160px;
+        position: fixed;
+        top: -700px;
+        left: 50%;
+        margin-left: -960px;
+        width: 1920px;
         height: 700px;
+        pointer-events: none;
+        z-index: 3000;
         background: url('https://www.dublincleaners.com/wp-content/uploads/2025/06/Firesprite.png') no-repeat;
         background-size: 1920px 700px;
         animation: flicker 1.2s steps(12) infinite, descend 4s linear forwards, fadeout 4s ease-out forwards;
         animation-play-state: paused;
         opacity: 1;
       }
-      .fire:nth-child(1) { left: 30%; top: -700px; animation-delay: 0s; }
-      .fire:nth-child(2) { left: 45%; top: -700px; animation-delay: 1s; }
-      .fire:nth-child(3) { left: 60%; top: -700px; animation-delay: 2s; }
+      .fire:nth-child(1) { animation-delay: 0s; }
+      .fire:nth-child(2) { animation-delay: 1s; }
+      .fire:nth-child(3) { animation-delay: 2s; }
 
       @keyframes flicker { from { background-position: 0 0; } to { background-position: -1920px 0; } }
-      @keyframes descend { to { transform: translateY(120vh); } }
+      @keyframes descend {
+        to {
+          transform: translateY(100vh);
+        }
+      }
       @keyframes fadeout { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
     </style>
     <script>
