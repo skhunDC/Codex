@@ -169,6 +169,7 @@
         background: url('https://www.dublincleaners.com/wp-content/uploads/2025/06/Firesprite.png') no-repeat;
         background-size: 1920px 700px;
         animation: flicker 1.2s steps(12) infinite, descend 4s linear forwards, fadeout 4s ease-out forwards;
+        animation-play-state: paused;
         opacity: 1;
       }
       .fire:nth-child(1) { left: 30%; top: -700px; animation-delay: 0s; }
@@ -245,6 +246,7 @@
         setTimeout(function() {
           clearInterval(interval);
           overlay.style.display = 'none';
+          startFireAnimations();
         }, 5000);
       }
 
@@ -435,6 +437,13 @@
           img.classList.remove('fade-out');
           startDriverAnimation();
         }, 2000);
+      }
+
+      function startFireAnimations() {
+        var fires = document.querySelectorAll('.fire');
+        fires.forEach(function(fire) {
+          fire.style.animationPlayState = 'running';
+        });
       }
 
       document.addEventListener('DOMContentLoaded', function() {
