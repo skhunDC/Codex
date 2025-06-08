@@ -82,6 +82,34 @@
         bottom: 0;
         cursor: se-resize;
       }
+      .sheet-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 2px;
+        margin: 2px 0;
+      }
+      .sheet-btn {
+        font-size: 10px;
+        padding: 2px 4px;
+      }
+      .spreadsheet {
+        overflow: auto;
+      }
+      .spreadsheet table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      .spreadsheet th,
+      .spreadsheet td {
+        border: 1px solid #999;
+        padding: 2px 4px;
+        width: 40px;
+        height: 20px;
+      }
+      .spreadsheet th {
+        background: #f0f0f0;
+        text-align: center;
+      }
       .weekly-quote {
         position: fixed;
         bottom: 10px;
@@ -250,7 +278,14 @@
       }
 
       function addFrame() {
-        var frame = { x: 10, y: 10, width: 200, height: 150, title: 'Frame' };
+        var frame = {
+          x: 10,
+          y: 10,
+          width: 200,
+          height: 150,
+          title: 'Frame',
+          sheet: createDefaultSheet(3, 3)
+        };
         frames.push(frame);
         createFrame(frame, frames.length - 1);
         saveFrames();
@@ -280,6 +315,30 @@
         header.appendChild(close);
         div.appendChild(header);
 
+        var btnWrap = document.createElement('div');
+        btnWrap.className = 'sheet-buttons';
+        var addColBtn = document.createElement('button');
+        addColBtn.className = 'sheet-btn';
+        addColBtn.textContent = 'Add Col';
+        btnWrap.appendChild(addColBtn);
+        var remColBtn = document.createElement('button');
+        remColBtn.className = 'sheet-btn';
+        remColBtn.textContent = 'Del Col';
+        btnWrap.appendChild(remColBtn);
+        var addRowBtn = document.createElement('button');
+        addRowBtn.className = 'sheet-btn';
+        addRowBtn.textContent = 'Add Row';
+        btnWrap.appendChild(addRowBtn);
+        var remRowBtn = document.createElement('button');
+        remRowBtn.className = 'sheet-btn';
+        remRowBtn.textContent = 'Del Row';
+        btnWrap.appendChild(remRowBtn);
+        div.appendChild(btnWrap);
+
+        var sheetDiv = document.createElement('div');
+        sheetDiv.className = 'spreadsheet';
+        div.appendChild(sheetDiv);
+
         var resizer = document.createElement('div');
         resizer.className = 'resizer';
         div.appendChild(resizer);
@@ -298,10 +357,127 @@
           saveFrames();
         });
 
+        addColBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          addColumn(parseInt(div.dataset.index, 10));
+        });
+        remColBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          removeColumn(parseInt(div.dataset.index, 10));
+        });
+        addRowBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          addRow(parseInt(div.dataset.index, 10));
+        });
+        remRowBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          removeRow(parseInt(div.dataset.index, 10));
+        });
+
+        if (!frame.sheet) {
+          frame.sheet = createDefaultSheet(3, 3);
+        }
+        renderSheet(sheetDiv, parseInt(div.dataset.index, 10));
+
         area.appendChild(div);
 
         enableDrag(div);
         enableResize(div, resizer);
+      }
+
+      function createDefaultSheet(r, c) {
+        var data = [];
+        for (var i = 0; i < r; i++) {
+          var row = [];
+          for (var j = 0; j < c; j++) row.push('');
+          data.push(row);
+        }
+        return { rows: r, cols: c, data: data };
+      }
+
+      function renderSheet(container, index) {
+        var sheet = frames[index].sheet;
+        container.innerHTML = '';
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        var hrow = document.createElement('tr');
+        hrow.appendChild(document.createElement('th'));
+        for (var c = 0; c < sheet.cols; c++) {
+          var th = document.createElement('th');
+          th.textContent = String.fromCharCode(65 + c);
+          hrow.appendChild(th);
+        }
+        thead.appendChild(hrow);
+        table.appendChild(thead);
+
+        var tbody = document.createElement('tbody');
+        for (var r = 0; r < sheet.rows; r++) {
+          var tr = document.createElement('tr');
+          var rowHeader = document.createElement('th');
+          rowHeader.textContent = r + 1;
+          tr.appendChild(rowHeader);
+          for (var c2 = 0; c2 < sheet.cols; c2++) {
+            var td = document.createElement('td');
+            td.contentEditable = true;
+            td.textContent = sheet.data[r][c2] || '';
+            (function(ridx, cidx) {
+              td.addEventListener('input', function() {
+                frames[index].sheet.data[ridx][cidx] = td.textContent;
+                saveFrames();
+              });
+            })(r, c2);
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        container.appendChild(table);
+      }
+
+      function addRow(index) {
+        var sheet = frames[index].sheet;
+        var row = [];
+        for (var i = 0; i < sheet.cols; i++) row.push('');
+        sheet.data.push(row);
+        sheet.rows++;
+        var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
+        renderSheet(div, index);
+        saveFrames();
+      }
+
+      function removeRow(index) {
+        var sheet = frames[index].sheet;
+        if (sheet.rows > 1) {
+          sheet.data.pop();
+          sheet.rows--;
+          var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
+          renderSheet(div, index);
+          saveFrames();
+        }
+      }
+
+      function addColumn(index) {
+        var sheet = frames[index].sheet;
+        for (var i = 0; i < sheet.rows; i++) {
+          sheet.data[i].push('');
+        }
+        sheet.cols++;
+        var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
+        renderSheet(div, index);
+        saveFrames();
+      }
+
+      function removeColumn(index) {
+        var sheet = frames[index].sheet;
+        if (sheet.cols > 1) {
+          for (var i = 0; i < sheet.rows; i++) {
+            sheet.data[i].pop();
+          }
+          sheet.cols--;
+          var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
+          renderSheet(div, index);
+          saveFrames();
+        }
       }
 
       function updateFrameIndices() {
