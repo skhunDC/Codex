@@ -96,39 +96,47 @@
         display: block;
         opacity: 1;
         transition: opacity 2s ease;
+        mask-image: radial-gradient(circle at center, black 85%, transparent 100%);
+        -webkit-mask-image: radial-gradient(circle at center, black 85%, transparent 100%);
+        mask-size: cover;
+        -webkit-mask-size: cover;
       }
       .driver-overlay img.fade-out {
         opacity: 0;
       }
       .driver-overlay img.animate {
-        mask-image: repeating-linear-gradient(
-          to right,
-          black 0,
-          black 10px,
-          transparent 10px,
-          transparent 20px
-        );
-        -webkit-mask-image: repeating-linear-gradient(
-          to right,
-          black 0,
-          black 10px,
-          transparent 10px,
-          transparent 20px
-        );
-        mask-size: 200% 100%;
-        -webkit-mask-size: 200% 100%;
-        mask-position: -100% 0;
-        -webkit-mask-position: -100% 0;
+        mask-image:
+          radial-gradient(circle at center, black 85%, transparent 100%),
+          repeating-linear-gradient(
+            to right,
+            black 0,
+            black 10px,
+            transparent 10px,
+            transparent 20px
+          );
+        -webkit-mask-image:
+          radial-gradient(circle at center, black 85%, transparent 100%),
+          repeating-linear-gradient(
+            to right,
+            black 0,
+            black 10px,
+            transparent 10px,
+            transparent 20px
+          );
+        mask-size: cover, 200% 100%;
+        -webkit-mask-size: cover, 200% 100%;
+        mask-position: center, -100% 0;
+        -webkit-mask-position: center, -100% 0;
         animation: maskSlideReverse 2s linear forwards;
       }
       @keyframes maskSlideReverse {
         from {
-          mask-position: -100% 0;
-          -webkit-mask-position: -100% 0;
+          mask-position: center, -100% 0;
+          -webkit-mask-position: center, -100% 0;
         }
         to {
-          mask-position: 0 0;
-          -webkit-mask-position: 0 0;
+          mask-position: center, 0 0;
+          -webkit-mask-position: center, 0 0;
         }
       }
     </style>
