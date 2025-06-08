@@ -172,7 +172,7 @@
 
       function updateWeather(data) {
         if (data) {
-          document.getElementById('weather-temp').textContent = 'Temp: ' + data.temperature + '°C';
+          document.getElementById('weather-temp').textContent = 'Temp: ' + data.temperature + '°F';
           document.getElementById('weather-condition').textContent = data.condition;
         } else {
           document.getElementById('weather-temp').textContent = '';
