@@ -528,8 +528,13 @@
         var startX, startY, startLeft, startTop, idx;
 
         el.addEventListener('mousedown', function(e) {
-          if (e.target.classList.contains('resizer') ||
-              e.target.classList.contains('frame-title')) return;
+          if (
+            e.target.classList.contains('resizer') ||
+            e.target.classList.contains('frame-title') ||
+            e.target.closest('.spreadsheet') ||
+            e.target.classList.contains('sheet-btn')
+          )
+            return;
           e.preventDefault();
           idx = parseInt(el.dataset.index, 10);
           startX = e.clientX;
