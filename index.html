@@ -123,11 +123,29 @@
       }
       .driver-overlay {
         position: fixed;
-        bottom: 80px;
+        bottom: 160px;
         right: 10px;
         width: 275px;
         pointer-events: none;
         z-index: 1000;
+      }
+
+      .driver-week {
+        position: fixed;
+        bottom: 60px;
+        right: 10px;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 8px 12px;
+        border-radius: 4px;
+        z-index: 1000;
+        pointer-events: auto;
+      }
+
+      .driver-week input {
+        width: 100%;
+        margin-top: 4px;
+        box-sizing: border-box;
       }
       .driver-overlay img {
         width: 100%;
@@ -672,6 +690,10 @@
     <div id="viewing-area" class="viewing-area"></div>
     <div class="driver-overlay">
       <img id="driver-img" src="https://www.dublincleaners.com/wp-content/uploads/2025/06/Driver7.png" alt="Driver">
+    </div>
+    <div id="driver-week" class="driver-week">
+      <label for="driver-name">Driver of the Week</label>
+      <input type="text" id="driver-name" placeholder="Enter name">
     </div>
     <div id="weekly-quote" class="weekly-quote"></div>
   </body>
