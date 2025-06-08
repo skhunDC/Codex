@@ -392,40 +392,75 @@
           for (var j = 0; j < c; j++) row.push('');
           data.push(row);
         }
-        return { rows: r, cols: c, data: data };
+        return { rows: r, cols: c, data: data, computed: [] };
+      }
+
+      function lettersToIndex(letters) {
+        var num = 0;
+        for (var i = 0; i < letters.length; i++) {
+          num = num * 26 + (letters.charCodeAt(i) - 64);
+        }
+        return num - 1;
+      }
+
+      function evaluateCell(sheet, r, c, visited) {
+        var key = r + '_' + c;
+        if (visited[key]) return '#CIRC';
+        visited[key] = true;
+        var val = sheet.data[r][c];
+        if (val == null) return '';
+        if (typeof val !== 'string' || val.charAt(0) !== '=') return val;
+        var expr = val.substring(1);
+        expr = expr.replace(/([A-Z]+)(\d+)/g, function(_, col, row) {
+          var colIdx = lettersToIndex(col);
+          var rowIdx = parseInt(row, 10) - 1;
+          if (rowIdx < 0 || rowIdx >= sheet.rows || colIdx < 0 || colIdx >= sheet.cols) return 0;
+          var res = evaluateCell(sheet, rowIdx, colIdx, visited);
+          return res === '' ? 0 : res;
+        });
+        try {
+          /* eslint no-new-func: 0 */
+          return Function('return ' + expr)();
+        } catch (e) {
+          return '#ERR';
+        }
+      }
+
+      function evaluateSheet(sheet) {
+        sheet.computed = [];
+        for (var r = 0; r < sheet.rows; r++) {
+          sheet.computed[r] = [];
+          for (var c = 0; c < sheet.cols; c++) {
+            sheet.computed[r][c] = evaluateCell(sheet, r, c, {});
+          }
+        }
       }
 
       function renderSheet(container, index) {
         var sheet = frames[index].sheet;
+        evaluateSheet(sheet);
         container.innerHTML = '';
         var table = document.createElement('table');
-        var thead = document.createElement('thead');
-        var hrow = document.createElement('tr');
-        hrow.appendChild(document.createElement('th'));
-        for (var c = 0; c < sheet.cols; c++) {
-          var th = document.createElement('th');
-          th.textContent = String.fromCharCode(65 + c);
-          hrow.appendChild(th);
-        }
-        thead.appendChild(hrow);
-        table.appendChild(thead);
-
         var tbody = document.createElement('tbody');
         for (var r = 0; r < sheet.rows; r++) {
           var tr = document.createElement('tr');
-          var rowHeader = document.createElement('th');
-          rowHeader.textContent = r + 1;
-          tr.appendChild(rowHeader);
-          for (var c2 = 0; c2 < sheet.cols; c2++) {
+          for (var c = 0; c < sheet.cols; c++) {
             var td = document.createElement('td');
             td.contentEditable = true;
-            td.textContent = sheet.data[r][c2] || '';
-            (function(ridx, cidx) {
-              td.addEventListener('input', function() {
-                frames[index].sheet.data[ridx][cidx] = td.textContent;
+            td.textContent = sheet.computed[r][c];
+            td.dataset.r = r;
+            td.dataset.c = c;
+            (function(ridx, cidx, cell) {
+              cell.addEventListener('focus', function() {
+                cell.textContent = sheet.data[ridx][cidx] || '';
+              });
+              cell.addEventListener('blur', function() {
+                sheet.data[ridx][cidx] = cell.textContent;
+                evaluateSheet(sheet);
+                renderSheet(container, index);
                 saveFrames();
               });
-            })(r, c2);
+            })(r, c, td);
             tr.appendChild(td);
           }
           tbody.appendChild(tr);
@@ -440,6 +475,7 @@
         for (var i = 0; i < sheet.cols; i++) row.push('');
         sheet.data.push(row);
         sheet.rows++;
+        evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
         saveFrames();
@@ -450,6 +486,7 @@
         if (sheet.rows > 1) {
           sheet.data.pop();
           sheet.rows--;
+          evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
           saveFrames();
@@ -462,6 +499,7 @@
           sheet.data[i].push('');
         }
         sheet.cols++;
+        evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
         saveFrames();
@@ -474,6 +512,7 @@
             sheet.data[i].pop();
           }
           sheet.cols--;
+          evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
           saveFrames();
