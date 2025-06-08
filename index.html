@@ -14,7 +14,7 @@
           flex-direction: column;
           min-height: 100vh;
           overflow: hidden;
-          cursor: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBvbHlnb24gcG9pbnRzPSIyLDAgMiwyMiA3LDE3IDEwLDI0IDEzLDIzIDksMTUgMTYsMTUiIGZpbGw9IiNiMzAwMDAiIHN0cm9rZT0iYmxhY2siIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==') 0 0, auto;
+          cursor: auto;
         }
       .header {
         position: relative;
@@ -109,10 +109,12 @@
         margin: 2px 0;
       }
       .sheet-btn {
+        cursor: pointer;
         font-size: 10px;
         padding: 2px 4px;
       }
       .spreadsheet {
+        cursor: text;
         overflow: auto;
       }
       .spreadsheet table {
@@ -121,6 +123,7 @@
       }
       .spreadsheet th,
       .spreadsheet td {
+        cursor: text;
         border: 1px solid #999;
         padding: 2px 4px;
         width: 40px;
