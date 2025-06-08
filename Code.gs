@@ -62,3 +62,17 @@ function getFrames() {
 function saveFrames(frames) {
   PropertiesService.getScriptProperties().setProperty('frames', JSON.stringify(frames));
 }
+
+function getRandomQuote() {
+  var url = 'https://api.quotable.io/random';
+  try {
+    var response = UrlFetchApp.fetch(url);
+    var data = JSON.parse(response.getContentText());
+    if (data && data.content && data.author) {
+      return data.content + ' — ' + data.author;
+    }
+  } catch (e) {
+    // ignore errors and fall through to default text
+  }
+  return 'Quote unavailable';
+}
