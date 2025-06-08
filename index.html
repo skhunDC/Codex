@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      body { margin: 0; font-family: Arial, sans-serif; }
+      .header { display: flex; align-items: center; justify-content: space-between; background-color: #1e90ff; color: white; padding: 20px; }
+      .header img { height: 80px; }
+      .header-title { text-align: center; flex-grow: 1; }
+      .header-title h1 { margin: 0; font-size: 36px; }
+      .header-title .datetime { font-size: 18px; margin-top: 8px; }
+      .weather { text-align: right; }
+    </style>
+    <script>
+      function updateDateTime() {
+        var now = new Date();
+        document.getElementById('datetime').textContent = now.toLocaleString();
+      }
+
+      function updateWeather(data) {
+        if (data) {
+          var weatherText = 'Temp: ' + data.temperature + '°C, Wind: ' + data.windspeed + ' km/h';
+          document.getElementById('weather').textContent = weatherText;
+        } else {
+          document.getElementById('weather').textContent = 'Weather unavailable';
+        }
+      }
+
+      function init() {
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+        google.script.run.withSuccessHandler(updateWeather).getWeather();
+      }
+    </script>
+  </head>
+  <body onload="init()">
+    <div class="header">
+      <div class="logo">
+        <img src="https://drive.google.com/uc?export=view&id=1HXHpdBhgbXoiKr92RGzbezhGBpMq7Vie" alt="Logo">
+      </div>
+      <div class="header-title">
+        <h1>Route Operations Dashboard</h1>
+        <div id="datetime" class="datetime"></div>
+      </div>
+      <div id="weather" class="weather"></div>
+    </div>
+  </body>
+</html>
