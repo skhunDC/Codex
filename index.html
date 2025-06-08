@@ -34,6 +34,9 @@
       .weather div { line-height: 1.2; }
       .add-frame-btn { margin-top: 8px; padding: 6px 12px; background-color: #ffffff; color: #b30000; border: none; cursor: pointer; }
       .add-frame-btn:hover { background-color: #ffd1d1; }
+      .upload-panel { display: none; margin-top: 4px; }
+      .upload-panel label { display: block; font-size: 12px; color: #ffd1d1; }
+      .upload-panel input { margin-top: 2px; }
       .viewing-area {
         position: relative;
         flex: 1;
@@ -235,6 +238,67 @@
         }
       }
 
+      function initHeaderTitle() {
+        var titleEl = document.getElementById('header-title');
+        google.script.run.withSuccessHandler(function(t) {
+          if (t) titleEl.textContent = t;
+        }).getHeaderTitle();
+        function save() {
+          google.script.run.saveHeaderTitle(titleEl.textContent.trim());
+        }
+        titleEl.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            titleEl.blur();
+          }
+        });
+        titleEl.addEventListener('blur', save);
+      }
+
+      function initUploads() {
+        var panel = document.getElementById('upload-panel');
+        document.getElementById('upload-toggle').addEventListener('click', function() {
+          panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        });
+        var logoInput = document.getElementById('logo-upload');
+        var driverInput = document.getElementById('driver-upload');
+        logoInput.addEventListener('change', function() {
+          var file = this.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var src = e.target.result;
+            document.querySelector('.logo img').src = src;
+            google.script.run.saveLogoImage(src);
+          };
+          reader.readAsDataURL(file);
+          this.value = '';
+        });
+        driverInput.addEventListener('change', function() {
+          var file = this.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            var src = e.target.result;
+            var img = document.getElementById('driver-img');
+            img.src = src;
+            startDriverAnimation();
+            google.script.run.saveDriverImage(src);
+          };
+          reader.readAsDataURL(file);
+          this.value = '';
+        });
+        google.script.run.withSuccessHandler(function(src) {
+          if (src) document.querySelector('.logo img').src = src;
+        }).getLogoImage();
+        google.script.run.withSuccessHandler(function(src) {
+          if (src) {
+            document.getElementById('driver-img').src = src;
+            startDriverAnimation();
+          }
+        }).getDriverImage();
+      }
+
       function init() {
         updateDateTime();
         setInterval(updateDateTime, 1000);
@@ -245,6 +309,8 @@
         google.script.run.withSuccessHandler(loadFrames).getFrames();
         document.getElementById('add-frame').addEventListener('click', addFrame);
         initDriver();
+        initHeaderTitle();
+        initUploads();
       }
 
       var frames = [];
@@ -705,13 +771,22 @@
         <img src="https://www.dublincleaners.com/wp-content/uploads/2025/06/LogosHQ.png" alt="Logo">
       </div>
       <div class="header-title">
-        <h1>Route Operations Dashboard</h1>
+        <h1 id="header-title" contenteditable="true">Route Operations Dashboard</h1>
         <div id="datetime" class="datetime"></div>
       </div>
       <div id="weather" class="weather">
         <div id="weather-temp"></div>
         <div id="weather-condition"></div>
         <button id="add-frame" class="add-frame-btn">Add Frame</button>
+        <button id="upload-toggle" class="add-frame-btn">Upload</button>
+        <div id="upload-panel" class="upload-panel">
+          <label>Logo Image
+            <input type="file" id="logo-upload" accept="image/*">
+          </label>
+          <label>Driver Image
+            <input type="file" id="driver-upload" accept="image/*">
+          </label>
+        </div>
       </div>
     </div>
     <div id="viewing-area" class="viewing-area"></div>

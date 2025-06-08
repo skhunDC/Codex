@@ -119,3 +119,43 @@ function fetchQuote() {
   // Use a random local quote as a fallback
   return FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)];
 }
+
+function getHeaderTitle() {
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('headerTitle') || 'Route Operations Dashboard';
+}
+
+function saveHeaderTitle(title) {
+  PropertiesService.getScriptProperties().setProperty(
+    'headerTitle',
+    title || 'Route Operations Dashboard'
+  );
+}
+
+function getLogoImage() {
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('logoImage') || '';
+}
+
+function saveLogoImage(data) {
+  var props = PropertiesService.getScriptProperties();
+  if (data) {
+    props.setProperty('logoImage', data);
+  } else {
+    props.deleteProperty('logoImage');
+  }
+}
+
+function getDriverImage() {
+  var props = PropertiesService.getScriptProperties();
+  return props.getProperty('driverImage') || '';
+}
+
+function saveDriverImage(data) {
+  var props = PropertiesService.getScriptProperties();
+  if (data) {
+    props.setProperty('driverImage', data);
+  } else {
+    props.deleteProperty('driverImage');
+  }
+}
