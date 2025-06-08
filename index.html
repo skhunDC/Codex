@@ -139,6 +139,22 @@
           -webkit-mask-position: center, 0 0;
         }
       }
+      #loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+      }
+      #loading-canvas {
+        width: 100%;
+        height: 120px;
+      }
     </style>
     <script>
       function updateDateTime() {
@@ -169,6 +185,44 @@
 
       var frames = [];
       var zIndex = 1;
+
+      function startLoadingAnimation() {
+        var overlay = document.getElementById('loading-overlay');
+        var canvas = document.getElementById('loading-canvas');
+        if (!overlay || !canvas) return;
+        overlay.style.display = 'flex';
+        var ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = canvas.clientHeight;
+
+        var chars = 'アカサタナハマヤラワ漢字0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        chars = chars.split('');
+        var fontSize = 20;
+        var rows = Math.floor(canvas.height / fontSize);
+        var positions = Array(rows).fill(0);
+
+        function draw() {
+          ctx.fillStyle = 'rgba(0,0,0,0.1)';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#b30000';
+          ctx.font = fontSize + 'px monospace';
+          for (var i = 0; i < rows; i++) {
+            var text = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(text, positions[i], i * fontSize + fontSize);
+            if (positions[i] > canvas.width) {
+              positions[i] = 0;
+            } else {
+              positions[i] += fontSize;
+            }
+          }
+        }
+
+        var interval = setInterval(draw, 50);
+        setTimeout(function() {
+          clearInterval(interval);
+          overlay.style.display = 'none';
+        }, 3500);
+      }
 
       function updateQuote() {
         google.script.run.withSuccessHandler(function(text) {
@@ -360,12 +414,16 @@
       }
 
       document.addEventListener('DOMContentLoaded', function() {
+        startLoadingAnimation();
         startDriverAnimation();
         setInterval(fadeAndAnimate, 30000);
       });
     </script>
   </head>
   <body onload="init()">
+    <div id="loading-overlay">
+      <canvas id="loading-canvas"></canvas>
+    </div>
     <div class="header">
       <div class="logo">
         <img src="https://www.dublincleaners.com/wp-content/uploads/2025/06/LogosHQ.png" alt="Logo">
