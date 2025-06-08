@@ -455,6 +455,7 @@
         if (val == null) return '';
         if (typeof val !== 'string' || val.charAt(0) !== '=') return val;
         var expr = val.substring(1);
+        expr = expr.replace(/\^/g, '**');
         expr = expr.replace(/([A-Z]+)(\d+)/g, function(_, col, row) {
           var colIdx = lettersToIndex(col);
           var rowIdx = parseInt(row, 10) - 1;
