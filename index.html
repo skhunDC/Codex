@@ -10,6 +10,7 @@
       .header-title h1 { margin: 0; font-size: 36px; }
       .header-title .datetime { font-size: 18px; margin-top: 8px; }
       .weather { text-align: right; }
+      .weather div { line-height: 1.2; }
     </style>
     <script>
       function updateDateTime() {
@@ -19,10 +20,11 @@
 
       function updateWeather(data) {
         if (data) {
-          var weatherText = 'Temp: ' + data.temperature + '°C, Wind: ' + data.windspeed + ' km/h';
-          document.getElementById('weather').textContent = weatherText;
+          document.getElementById('weather-temp').textContent = 'Temp: ' + data.temperature + '°C';
+          document.getElementById('weather-condition').textContent = data.condition;
         } else {
-          document.getElementById('weather').textContent = 'Weather unavailable';
+          document.getElementById('weather-temp').textContent = '';
+          document.getElementById('weather-condition').textContent = 'Weather unavailable';
         }
       }
 
@@ -42,7 +44,10 @@
         <h1>Route Operations Dashboard</h1>
         <div id="datetime" class="datetime"></div>
       </div>
-      <div id="weather" class="weather"></div>
+      <div id="weather" class="weather">
+        <div id="weather-temp"></div>
+        <div id="weather-condition"></div>
+      </div>
     </div>
   </body>
 </html>
