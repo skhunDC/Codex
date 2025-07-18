@@ -462,14 +462,26 @@
         google.script.run.saveFrames(frames);
       }
 
+      function calculateFrameSize(rows, cols) {
+        var cellW = 40;
+        var cellH = 20;
+        var width = cols * cellW + 20; // padding for borders/resizer
+        var height = rows * cellH + 70; // header + buttons + padding
+        return { width: width, height: height };
+      }
+
       function addFrame() {
+        var rows = 3;
+        var cols = 3;
+        var sheet = createDefaultSheet(rows, cols);
+        var size = calculateFrameSize(rows, cols);
         var frame = {
           x: 10,
           y: 10,
-          width: 200,
-          height: 150,
+          width: size.width,
+          height: size.height,
           title: 'Frame',
-          sheet: createDefaultSheet(3, 3)
+          sheet: sheet
         };
         frames.push(frame);
         createFrame(frame, frames.length - 1);
@@ -482,6 +494,14 @@
         div.className = 'frame';
         div.style.left = frame.x + 'px';
         div.style.top = frame.y + 'px';
+        if (!frame.sheet) {
+          frame.sheet = createDefaultSheet(3, 3);
+        }
+        if (!frame.width || !frame.height) {
+          var size = calculateFrameSize(frame.sheet.rows, frame.sheet.cols);
+          frame.width = size.width;
+          frame.height = size.height;
+        }
         div.style.width = frame.width + 'px';
         div.style.height = frame.height + 'px';
         div.dataset.index = index;
@@ -559,9 +579,6 @@
           removeRow(parseInt(div.dataset.index, 10));
         });
 
-        if (!frame.sheet) {
-          frame.sheet = createDefaultSheet(3, 3);
-        }
         renderSheet(sheetDiv, parseInt(div.dataset.index, 10));
 
         area.appendChild(div);
@@ -757,6 +774,7 @@
         handle.addEventListener('mousedown', function(e) {
           if (framesLocked) return;
           e.stopPropagation();
+          e.preventDefault();
           idx = parseInt(el.dataset.index, 10);
           startX = e.clientX;
           startY = e.clientY;
@@ -778,10 +796,12 @@
           function up() {
             document.removeEventListener('mousemove', move);
             document.removeEventListener('mouseup', up);
+            document.removeEventListener('mouseleave', up);
             saveFrames();
           }
           document.addEventListener('mousemove', move);
           document.addEventListener('mouseup', up);
+          document.addEventListener('mouseleave', up);
       });
       }
 
