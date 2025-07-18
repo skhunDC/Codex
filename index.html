@@ -461,45 +461,21 @@
         if (!framesLoaded) return;
         google.script.run.saveFrames(frames);
       }
-      function defaultFrameDimensions(rows, cols) {
-        var cellW = 40;
-        var cellH = 20;
-        var headerH = 28;
-        var buttonsH = 24;
-        var padding = 10;
-        return {
-          width: cols * cellW + padding,
-          height: headerH + rows * cellH + buttonsH
-        };
-      }
-
-      function resizeToSheet(index) {
-        var frame = frames[index];
-        var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
-        frame.width = dims.width;
-        frame.height = dims.height;
-        var el = document.querySelector('.frame[data-index="' + index + '"]');
-        if (el) {
-          el.style.width = dims.width + 'px';
-          el.style.height = dims.height + 'px';
-        }
-      }
-
       function addFrame() {
-        var sheet = createDefaultSheet(3, 3);
-        var dims = defaultFrameDimensions(sheet.rows, sheet.cols);
         var frame = {
           x: 10,
           y: 10,
-          width: dims.width,
-          height: dims.height,
+          width: 200,
+          height: 150,
           title: 'Frame',
-          sheet: sheet
+          sheet: createDefaultSheet(3, 3)
         };
         frames.push(frame);
         createFrame(frame, frames.length - 1);
         saveFrames();
       }
+
+
 
       function createFrame(frame, index) {
         var area = document.getElementById('viewing-area');
@@ -507,11 +483,6 @@
         div.className = 'frame';
         div.style.left = frame.x + 'px';
         div.style.top = frame.y + 'px';
-        if (!frame.width || !frame.height) {
-          var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
-          frame.width = dims.width;
-          frame.height = dims.height;
-        }
         div.style.width = frame.width + 'px';
         div.style.height = frame.height + 'px';
         div.dataset.index = index;
@@ -691,7 +662,6 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
-        resizeToSheet(index);
         saveFrames();
       }
 
@@ -703,7 +673,6 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
-          resizeToSheet(index);
           saveFrames();
         }
       }
@@ -717,7 +686,6 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
-        resizeToSheet(index);
         saveFrames();
       }
 
@@ -731,7 +699,6 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
-          resizeToSheet(index);
           saveFrames();
         }
       }
