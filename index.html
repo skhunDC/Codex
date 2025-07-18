@@ -310,21 +310,24 @@
           var files = Array.from(this.files || []);
           var input = this;
           if (files.length === 0) return;
-          google.script.run.withSuccessHandler(function() {
-            driverImages = [];
-            var remaining = files.length;
-            files.forEach(function(file) {
-              var reader = new FileReader();
-              reader.onload = function(e) {
-                var src = e.target.result;
-                driverImages.push(src);
-                google.script.run.addDriverImage(src);
-                if (--remaining === 0) startCarousel();
-              };
-              reader.readAsDataURL(file);
-            });
-            input.value = '';
-          }).clearDriverImages();
+          var data = [];
+          var remaining = files.length;
+          files.forEach(function(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              data.push(e.target.result);
+              if (--remaining === 0) {
+                google.script.run
+                  .withSuccessHandler(function(list) {
+                    driverImages = list || data;
+                    startCarousel();
+                    input.value = '';
+                  })
+                  .updateDriverImages(data);
+              }
+            };
+            reader.readAsDataURL(file);
+          });
         });
         google.script.run.withSuccessHandler(function(src) {
           if (src) document.querySelector('.logo img').src = src;
