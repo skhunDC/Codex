@@ -461,25 +461,38 @@
         if (!framesLoaded) return;
         google.script.run.saveFrames(frames);
       }
-
-      function calculateFrameSize(rows, cols) {
+      function defaultFrameDimensions(rows, cols) {
         var cellW = 40;
         var cellH = 20;
-        var width = cols * cellW + 20; // padding for borders/resizer
-        var height = rows * cellH + 70; // header + buttons + padding
-        return { width: width, height: height };
+        var headerH = 28;
+        var buttonsH = 24;
+        var padding = 10;
+        return {
+          width: cols * cellW + padding,
+          height: headerH + rows * cellH + buttonsH
+        };
+      }
+
+      function resizeToSheet(index) {
+        var frame = frames[index];
+        var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
+        frame.width = dims.width;
+        frame.height = dims.height;
+        var el = document.querySelector('.frame[data-index="' + index + '"]');
+        if (el) {
+          el.style.width = dims.width + 'px';
+          el.style.height = dims.height + 'px';
+        }
       }
 
       function addFrame() {
-        var rows = 3;
-        var cols = 3;
-        var sheet = createDefaultSheet(rows, cols);
-        var size = calculateFrameSize(rows, cols);
+        var sheet = createDefaultSheet(3, 3);
+        var dims = defaultFrameDimensions(sheet.rows, sheet.cols);
         var frame = {
           x: 10,
           y: 10,
-          width: size.width,
-          height: size.height,
+          width: dims.width,
+          height: dims.height,
           title: 'Frame',
           sheet: sheet
         };
@@ -494,13 +507,10 @@
         div.className = 'frame';
         div.style.left = frame.x + 'px';
         div.style.top = frame.y + 'px';
-        if (!frame.sheet) {
-          frame.sheet = createDefaultSheet(3, 3);
-        }
         if (!frame.width || !frame.height) {
-          var size = calculateFrameSize(frame.sheet.rows, frame.sheet.cols);
-          frame.width = size.width;
-          frame.height = size.height;
+          var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
+          frame.width = dims.width;
+          frame.height = dims.height;
         }
         div.style.width = frame.width + 'px';
         div.style.height = frame.height + 'px';
@@ -681,6 +691,7 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
+        resizeToSheet(index);
         saveFrames();
       }
 
@@ -692,6 +703,7 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
+          resizeToSheet(index);
           saveFrames();
         }
       }
@@ -705,6 +717,7 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
+        resizeToSheet(index);
         saveFrames();
       }
 
@@ -718,6 +731,7 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
+          resizeToSheet(index);
           saveFrames();
         }
       }
@@ -761,10 +775,12 @@
           function up() {
             document.removeEventListener('mousemove', move);
             document.removeEventListener('mouseup', up);
+            document.removeEventListener('mouseleave', up);
             saveFrames();
           }
           document.addEventListener('mousemove', move);
           document.addEventListener('mouseup', up);
+          document.addEventListener('mouseleave', up);
         });
       }
 
