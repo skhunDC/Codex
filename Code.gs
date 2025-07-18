@@ -198,3 +198,24 @@ function clearDriverImages() {
   });
   props.deleteProperty('driverImageIds');
 }
+
+function updateDriverImages(list) {
+  // Replace existing driver images with a new set provided as base64 data URLs
+  clearDriverImages();
+  if (!list || !list.length) return [];
+  var ids = [];
+  list.forEach(function(data) {
+    var m = data.match(/^data:(.+);base64,(.+)$/);
+    if (!m) return;
+    var contentType = m[1];
+    var bytes = Utilities.base64Decode(m[2]);
+    var blob = Utilities.newBlob(bytes, contentType, 'driver-image');
+    var file = DriveApp.createFile(blob);
+    ids.push(file.getId());
+  });
+  PropertiesService.getScriptProperties().setProperty(
+    'driverImageIds',
+    JSON.stringify(ids)
+  );
+  return getDriverImages();
+}
