@@ -171,7 +171,7 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 300px;
+        height: 250px;
         display: flex;
         align-items: flex-end;
         overflow: hidden;
@@ -222,10 +222,11 @@
       }
 
       .driver-carousel img {
-        width: 225px;
-        height: 225px;
+        width: 250px;
+        height: 250px;
         object-fit: cover;
-        object-position: bottom;
+        object-position: top;
+        flex-shrink: 0;
       }
       #loading-overlay {
         position: fixed;
@@ -797,13 +798,21 @@
         track.innerHTML = '';
         track.style.animation = 'none';
         if (driverImages.length === 0) return;
-        var images = driverImages.concat(driverImages);
+
+        var carousel = document.getElementById('driver-carousel');
+        var imgWidth = 250;
+        var repeat = Math.max(2, Math.ceil(carousel.offsetWidth / (driverImages.length * imgWidth)) + 1);
+        var images = [];
+        for (var i = 0; i < repeat; i++) {
+          images = images.concat(driverImages);
+        }
         images.forEach(function(src) {
           var img = document.createElement('img');
           img.src = src;
           track.appendChild(img);
         });
         var duration = images.length * 5;
+        void track.offsetWidth;
         track.style.animation = 'scroll-left ' + duration + 's linear infinite';
       }
 
