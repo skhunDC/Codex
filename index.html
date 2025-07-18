@@ -156,8 +156,7 @@
       .weekly-quote {
         position: fixed;
         bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        right: 10px;
         color: #ffffff;
         background: rgba(0, 0, 0, 0.5);
         padding: 8px 12px;
@@ -171,19 +170,30 @@
         bottom: 0;
         left: 0;
         right: 0;
-        height: 200px;
+        height: 300px;
         display: flex;
-        justify-content: center;
         align-items: center;
+        overflow: hidden;
         pointer-events: none;
         z-index: 500;
+      }
+      .carousel-track {
+        display: flex;
+        align-items: center;
+      }
+      @keyframes scroll-left {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-50%);
+        }
       }
 
       .driver-week {
         position: fixed;
         bottom: 60px;
-        left: 50%;
-        transform: translateX(-50%);
+        right: 10px;
         color: #ffffff;
         background: rgba(0, 0, 0, 0.5);
         padding: 8px 12px;
@@ -211,8 +221,8 @@
       }
 
       .driver-carousel img {
-        width: 200px;
-        height: 200px;
+        width: 300px;
+        height: 300px;
         object-fit: cover;
       }
       #loading-overlay {
@@ -348,8 +358,6 @@
       var zIndex = 1100;
 
       var driverImages = [];
-      var driverIndex = 0;
-      var carouselInterval;
 
       function startLoadingAnimation() {
         var overlay = document.getElementById('loading-overlay');
@@ -775,18 +783,20 @@
 
       window.addEventListener('resize', keepFramesInView);
 
-      function updateCarousel() {
-        if (driverImages.length === 0) return;
-        var img = document.getElementById('driver-carousel-img');
-        if (!img) return;
-        img.src = driverImages[driverIndex];
-        driverIndex = (driverIndex + 1) % driverImages.length;
-      }
-
       function startCarousel() {
-        updateCarousel();
-        clearInterval(carouselInterval);
-        carouselInterval = setInterval(updateCarousel, 5000);
+        var track = document.getElementById('carousel-track');
+        if (!track) return;
+        track.innerHTML = '';
+        track.style.animation = 'none';
+        if (driverImages.length === 0) return;
+        var images = driverImages.concat(driverImages);
+        images.forEach(function(src) {
+          var img = document.createElement('img');
+          img.src = src;
+          track.appendChild(img);
+        });
+        var duration = images.length * 5;
+        track.style.animation = 'scroll-left ' + duration + 's linear infinite';
       }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -824,7 +834,7 @@ document.addEventListener('DOMContentLoaded', function() {
     </div>
     <div id="viewing-area" class="viewing-area"></div>
     <div id="driver-carousel" class="driver-carousel">
-      <img id="driver-carousel-img" src="" alt="Driver Carousel">
+      <div id="carousel-track" class="carousel-track"></div>
     </div>
     <div id="driver-week" class="driver-week">
       <label for="driver-name">Driver of the Week</label>
