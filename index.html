@@ -635,6 +635,20 @@
         container.innerHTML = '';
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
+
+        // Determine if there is a column titled "Diff" or "$ Diff"
+        var diffCol = -1;
+        if (sheet.rows > 0) {
+          for (var dc = 0; dc < sheet.cols; dc++) {
+            var header = (sheet.data[0][dc] || '').toString().toLowerCase();
+            header = header.replace(/\s+/g, '');
+            if (header === 'diff' || header === '$diff') {
+              diffCol = dc;
+              break;
+            }
+          }
+        }
+
         for (var r = 0; r < sheet.rows; r++) {
           var tr = document.createElement('tr');
           for (var c = 0; c < sheet.cols; c++) {
@@ -643,6 +657,21 @@
             td.textContent = sheet.computed[r][c];
             td.dataset.r = r;
             td.dataset.c = c;
+
+            // Apply conditional colors for the Diff column
+            if (diffCol !== -1 && c === diffCol && r > 0) {
+              var val = parseFloat(sheet.computed[r][c]);
+              if (!isNaN(val)) {
+                if (val < 0) {
+                  td.style.backgroundColor = '#f8d7da';
+                } else if (val <= 300) {
+                  td.style.backgroundColor = '#fff3cd';
+                } else {
+                  td.style.backgroundColor = '#d4edda';
+                }
+              }
+            }
+
             (function(ridx, cidx, cell) {
               cell.addEventListener('focus', function() {
                 cell.textContent = sheet.data[ridx][cidx] || '';
