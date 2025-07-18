@@ -663,11 +663,14 @@
               var val = parseFloat(sheet.computed[r][c]);
               if (!isNaN(val)) {
                 if (val < 0) {
+                  // Negative values -> red
                   td.style.backgroundColor = '#f8d7da';
-                } else if (val <= 300) {
-                  td.style.backgroundColor = '#fff3cd';
-                } else {
+                } else if (val > 0) {
+                  // Positive values -> green
                   td.style.backgroundColor = '#d4edda';
+                } else {
+                  // Zero -> no color
+                  td.style.backgroundColor = '';
                 }
               }
             }
