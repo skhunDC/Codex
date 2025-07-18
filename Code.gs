@@ -146,41 +146,41 @@ function saveLogoImage(data) {
   }
 }
 
-function getDriverImage() {
+function getDriverImages() {
   var props = PropertiesService.getScriptProperties();
-  var fileId = props.getProperty('driverImageId');
-  if (!fileId) return '';
-  try {
-    var file = DriveApp.getFileById(fileId);
-    var blob = file.getBlob();
-    var base64 = Utilities.base64Encode(blob.getBytes());
-    return 'data:' + blob.getContentType() + ';base64,' + base64;
-  } catch (e) {
-    props.deleteProperty('driverImageId');
-    return '';
+  var ids = props.getProperty('driverImageIds');
+  if (!ids) return [];
+  ids = JSON.parse(ids);
+  var images = [];
+  var valid = [];
+  ids.forEach(function(id) {
+    try {
+      var file = DriveApp.getFileById(id);
+      var blob = file.getBlob();
+      var base64 = Utilities.base64Encode(blob.getBytes());
+      images.push('data:' + blob.getContentType() + ';base64,' + base64);
+      valid.push(id);
+    } catch (e) {
+      // ignore missing file
+    }
+  });
+  if (valid.length !== ids.length) {
+    props.setProperty('driverImageIds', JSON.stringify(valid));
   }
+  return images;
 }
 
-function saveDriverImage(data) {
+function addDriverImage(data) {
+  if (!data) return;
+  var m = data.match(/^data:(.+);base64,(.+)$/);
+  if (!m) return;
   var props = PropertiesService.getScriptProperties();
-  var oldId = props.getProperty('driverImageId');
-  if (oldId) {
-    try {
-      DriveApp.getFileById(oldId).setTrashed(true);
-    } catch (e) {
-      // ignore if file missing
-    }
-  }
-  if (data) {
-    var m = data.match(/^data:(.+);base64,(.+)$/);
-    if (m) {
-      var contentType = m[1];
-      var bytes = Utilities.base64Decode(m[2]);
-      var blob = Utilities.newBlob(bytes, contentType, 'driver-image');
-      var file = DriveApp.createFile(blob);
-      props.setProperty('driverImageId', file.getId());
-      return;
-    }
-  }
-  props.deleteProperty('driverImageId');
+  var ids = props.getProperty('driverImageIds');
+  var arr = ids ? JSON.parse(ids) : [];
+  var contentType = m[1];
+  var bytes = Utilities.base64Decode(m[2]);
+  var blob = Utilities.newBlob(bytes, contentType, 'driver-image');
+  var file = DriveApp.createFile(blob);
+  arr.push(file.getId());
+  props.setProperty('driverImageIds', JSON.stringify(arr));
 }
