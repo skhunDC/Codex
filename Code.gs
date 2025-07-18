@@ -184,3 +184,17 @@ function addDriverImage(data) {
   arr.push(file.getId());
   props.setProperty('driverImageIds', JSON.stringify(arr));
 }
+
+function clearDriverImages() {
+  var props = PropertiesService.getScriptProperties();
+  var ids = props.getProperty('driverImageIds');
+  if (!ids) return;
+  JSON.parse(ids).forEach(function(id) {
+    try {
+      DriveApp.getFileById(id).setTrashed(true);
+    } catch (e) {
+      // ignore missing file
+    }
+  });
+  props.deleteProperty('driverImageIds');
+}
