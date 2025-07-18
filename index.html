@@ -461,7 +461,6 @@
         if (!framesLoaded) return;
         google.script.run.saveFrames(frames);
       }
-
       function defaultFrameDimensions(rows, cols) {
         var cellW = 40;
         var cellH = 20;
@@ -590,9 +589,6 @@
           removeRow(parseInt(div.dataset.index, 10));
         });
 
-        if (!frame.sheet) {
-          frame.sheet = createDefaultSheet(3, 3);
-        }
         renderSheet(sheetDiv, parseInt(div.dataset.index, 10));
 
         area.appendChild(div);
