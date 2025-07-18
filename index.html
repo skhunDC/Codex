@@ -462,14 +462,40 @@
         google.script.run.saveFrames(frames);
       }
 
+      function defaultFrameDimensions(rows, cols) {
+        var cellW = 40;
+        var cellH = 20;
+        var headerH = 28;
+        var buttonsH = 24;
+        var padding = 10;
+        return {
+          width: cols * cellW + padding,
+          height: headerH + rows * cellH + buttonsH
+        };
+      }
+
+      function resizeToSheet(index) {
+        var frame = frames[index];
+        var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
+        frame.width = dims.width;
+        frame.height = dims.height;
+        var el = document.querySelector('.frame[data-index="' + index + '"]');
+        if (el) {
+          el.style.width = dims.width + 'px';
+          el.style.height = dims.height + 'px';
+        }
+      }
+
       function addFrame() {
+        var sheet = createDefaultSheet(3, 3);
+        var dims = defaultFrameDimensions(sheet.rows, sheet.cols);
         var frame = {
           x: 10,
           y: 10,
-          width: 200,
-          height: 150,
+          width: dims.width,
+          height: dims.height,
           title: 'Frame',
-          sheet: createDefaultSheet(3, 3)
+          sheet: sheet
         };
         frames.push(frame);
         createFrame(frame, frames.length - 1);
@@ -482,6 +508,11 @@
         div.className = 'frame';
         div.style.left = frame.x + 'px';
         div.style.top = frame.y + 'px';
+        if (!frame.width || !frame.height) {
+          var dims = defaultFrameDimensions(frame.sheet.rows, frame.sheet.cols);
+          frame.width = dims.width;
+          frame.height = dims.height;
+        }
         div.style.width = frame.width + 'px';
         div.style.height = frame.height + 'px';
         div.dataset.index = index;
@@ -664,6 +695,7 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
+        resizeToSheet(index);
         saveFrames();
       }
 
@@ -675,6 +707,7 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
+          resizeToSheet(index);
           saveFrames();
         }
       }
@@ -688,6 +721,7 @@
         evaluateSheet(sheet);
         var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
         renderSheet(div, index);
+        resizeToSheet(index);
         saveFrames();
       }
 
@@ -701,6 +735,7 @@
           evaluateSheet(sheet);
           var div = document.querySelector('.frame[data-index="' + index + '"] .spreadsheet');
           renderSheet(div, index);
+          resizeToSheet(index);
           saveFrames();
         }
       }
@@ -744,10 +779,12 @@
           function up() {
             document.removeEventListener('mousemove', move);
             document.removeEventListener('mouseup', up);
+            document.removeEventListener('mouseleave', up);
             saveFrames();
           }
           document.addEventListener('mousemove', move);
           document.addEventListener('mouseup', up);
+          document.addEventListener('mouseleave', up);
         });
       }
 
@@ -757,6 +794,7 @@
         handle.addEventListener('mousedown', function(e) {
           if (framesLocked) return;
           e.stopPropagation();
+          e.preventDefault();
           idx = parseInt(el.dataset.index, 10);
           startX = e.clientX;
           startY = e.clientY;
@@ -778,10 +816,12 @@
           function up() {
             document.removeEventListener('mousemove', move);
             document.removeEventListener('mouseup', up);
+            document.removeEventListener('mouseleave', up);
             saveFrames();
           }
           document.addEventListener('mousemove', move);
           document.addEventListener('mouseup', up);
+          document.addEventListener('mouseleave', up);
       });
       }
 
