@@ -329,12 +329,18 @@
             reader.readAsDataURL(file);
           });
         });
+        incrementLoad();
         google.script.run.withSuccessHandler(function(src) {
           if (src) document.querySelector('.logo img').src = src;
+          decrementLoad();
         }).getLogoImage();
+        incrementLoad();
         google.script.run.withSuccessHandler(function(list) {
-          driverImages = list || [];
-          startCarousel();
+          preloadImages(list || [], function(images) {
+            driverImages = images;
+            startCarousel();
+            decrementLoad();
+          });
         }).getDriverImages();
       }
 
@@ -355,7 +361,11 @@
         // refresh quote once a day
         setInterval(updateQuote, 86400000);
         google.script.run.withSuccessHandler(updateWeather).getWeather();
-        google.script.run.withSuccessHandler(loadFrames).getFrames();
+        incrementLoad();
+        google.script.run.withSuccessHandler(function(data) {
+          loadFrames(data);
+          decrementLoad();
+        }).getFrames();
         document.getElementById('add-frame').addEventListener('click', addFrame);
         initDriver();
         initHeaderTitle();
@@ -370,6 +380,17 @@
       var zIndex = 1100;
 
       var driverImages = [];
+      var pendingLoads = 0;
+      var loadingInterval = null;
+
+      function incrementLoad() {
+        pendingLoads++;
+      }
+
+      function decrementLoad() {
+        pendingLoads--;
+        if (pendingLoads <= 0) stopLoadingAnimation();
+      }
 
       function startLoadingAnimation() {
         var overlay = document.getElementById('loading-overlay');
@@ -402,11 +423,17 @@
           }
         }
 
-        var interval = setInterval(draw, 50);
-        setTimeout(function() {
-          clearInterval(interval);
-          overlay.style.display = 'none';
-        }, 5000);
+        loadingInterval = setInterval(draw, 50);
+      }
+
+      function stopLoadingAnimation() {
+        var overlay = document.getElementById('loading-overlay');
+        if (!overlay) return;
+        if (loadingInterval) {
+          clearInterval(loadingInterval);
+          loadingInterval = null;
+        }
+        overlay.style.display = 'none';
       }
 
       function updateQuote() {
@@ -794,6 +821,23 @@
       }
 
       window.addEventListener('resize', keepFramesInView);
+
+      function preloadImages(list, cb) {
+        if (!list.length) {
+          cb([]);
+          return;
+        }
+        var remaining = list.length;
+        var results = [];
+        list.forEach(function(src) {
+          var img = new Image();
+          img.onload = img.onerror = function() {
+            results.push(src);
+            if (--remaining === 0) cb(results);
+          };
+          img.src = src;
+        });
+      }
 
       function startCarousel() {
         var track = document.getElementById('carousel-track');
