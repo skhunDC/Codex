@@ -166,16 +166,17 @@
         border-radius: 4px;
         text-align: center;
       }
-      .driver-overlay {
+      .driver-carousel {
         position: fixed;
-        bottom: 160px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 450px;
-        pointer-events: none;
-        z-index: 1000;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 200px;
         display: flex;
         justify-content: center;
+        align-items: center;
+        pointer-events: none;
+        z-index: 500;
       }
 
       .driver-week {
@@ -208,52 +209,11 @@
         font-size: 32px;
         display: block;
       }
-      .driver-overlay img {
-        width: 100%;
-        height: auto;
-        display: block;
-        opacity: 1;
-        transition: opacity 2s ease;
-        mask-image: radial-gradient(circle at center, black 64%, transparent 100%);
-        -webkit-mask-image: radial-gradient(circle at center, black 64%, transparent 100%);
-        mask-size: cover;
-        -webkit-mask-size: cover;
-      }
-      .driver-overlay img.fade-out {
-        opacity: 0;
-      }
-      .driver-overlay img.animate {
-        mask-image:
-          repeating-linear-gradient(
-            to right,
-            black 0,
-            black 10px,
-            transparent 10px,
-            transparent 20px
-          );
-        -webkit-mask-image:
-          repeating-linear-gradient(
-            to right,
-            black 0,
-            black 10px,
-            transparent 10px,
-            transparent 20px
-          );
-        mask-size: 200% 100%;
-        -webkit-mask-size: 200% 100%;
-        mask-position: -100% 0;
-        -webkit-mask-position: -100% 0;
-        animation: maskSlideReverse 2s linear forwards;
-      }
-      @keyframes maskSlideReverse {
-        from {
-          mask-position: -100% 0;
-          -webkit-mask-position: -100% 0;
-        }
-        to {
-          mask-position: 0 0;
-          -webkit-mask-position: 0 0;
-        }
+
+      .driver-carousel img {
+        width: 200px;
+        height: 200px;
+        object-fit: cover;
       }
       #loading-overlay {
         position: fixed;
@@ -334,28 +294,26 @@
           this.value = '';
         });
         driverInput.addEventListener('change', function() {
-          var file = this.files[0];
-          if (!file) return;
-          var reader = new FileReader();
-          reader.onload = function(e) {
-            var src = e.target.result;
-            var img = document.getElementById('driver-img');
-            img.src = src;
-            startDriverAnimation();
-            google.script.run.saveDriverImage(src);
-          };
-          reader.readAsDataURL(file);
+          var files = Array.from(this.files || []);
+          files.forEach(function(file) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+              var src = e.target.result;
+              driverImages.push(src);
+              google.script.run.addDriverImage(src);
+              startCarousel();
+            };
+            reader.readAsDataURL(file);
+          });
           this.value = '';
         });
         google.script.run.withSuccessHandler(function(src) {
           if (src) document.querySelector('.logo img').src = src;
         }).getLogoImage();
-        google.script.run.withSuccessHandler(function(src) {
-          if (src) {
-            document.getElementById('driver-img').src = src;
-            startDriverAnimation();
-          }
-        }).getDriverImage();
+        google.script.run.withSuccessHandler(function(list) {
+          driverImages = list || [];
+          startCarousel();
+        }).getDriverImages();
       }
 
       function initLockToggle() {
@@ -386,8 +344,12 @@
       var frames = [];
       var framesLoaded = false;
       var framesLocked = true;
-      // Start frames above the driver overlay (z-index: 1000)
+      // Start frames above the driver carousel (z-index: 500)
       var zIndex = 1100;
+
+      var driverImages = [];
+      var driverIndex = 0;
+      var carouselInterval;
 
       function startLoadingAnimation() {
         var overlay = document.getElementById('loading-overlay');
@@ -813,32 +775,22 @@
 
       window.addEventListener('resize', keepFramesInView);
 
-      function startDriverAnimation() {
-        var img = document.getElementById('driver-img');
+      function updateCarousel() {
+        if (driverImages.length === 0) return;
+        var img = document.getElementById('driver-carousel-img');
         if (!img) return;
-        img.classList.remove('animate');
-        void img.offsetWidth;
-        img.classList.add('animate');
-        img.addEventListener('animationend', function handler() {
-          img.classList.remove('animate');
-          img.removeEventListener('animationend', handler);
-        });
+        img.src = driverImages[driverIndex];
+        driverIndex = (driverIndex + 1) % driverImages.length;
       }
 
-      function fadeAndAnimate() {
-        var img = document.getElementById('driver-img');
-        if (!img) return;
-        img.classList.add('fade-out');
-        setTimeout(function() {
-          img.classList.remove('fade-out');
-          startDriverAnimation();
-        }, 2000);
+      function startCarousel() {
+        updateCarousel();
+        clearInterval(carouselInterval);
+        carouselInterval = setInterval(updateCarousel, 5000);
       }
 
 document.addEventListener('DOMContentLoaded', function() {
   startLoadingAnimation();
-  startDriverAnimation();
-  setInterval(fadeAndAnimate, 30000);
 });
     </script>
   </head>
@@ -866,13 +818,13 @@ document.addEventListener('DOMContentLoaded', function() {
             <button id="driver-option" class="upload-option">Driver Image</button>
           </div>
           <input type="file" id="logo-upload" accept="image/*" style="display:none;">
-          <input type="file" id="driver-upload" accept="image/*" style="display:none;">
+          <input type="file" id="driver-upload" accept="image/*" multiple style="display:none;">
         </div>
       </div>
     </div>
     <div id="viewing-area" class="viewing-area"></div>
-    <div class="driver-overlay">
-      <img id="driver-img" src="https://www.dublincleaners.com/wp-content/uploads/2025/06/Driver7.png" alt="Driver">
+    <div id="driver-carousel" class="driver-carousel">
+      <img id="driver-carousel-img" src="" alt="Driver Carousel">
     </div>
     <div id="driver-week" class="driver-week">
       <label for="driver-name">Driver of the Week</label>
